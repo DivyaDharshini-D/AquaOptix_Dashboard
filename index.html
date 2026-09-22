@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AquaOptiX Dashboard</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f8fc;
+            color: #172b4d;
+        }
+
+        /* HEADER */
+        .header {
+            background: linear-gradient(135deg, #087ea4, #075985);
+            color: white;
+            padding: 22px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            margin-top: 5px;
+            opacity: 0.85;
+        }
+
+        .system-status {
+            background: #d1fae5;
+            color: #047857;
+            padding: 9px 16px;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        /* MAIN */
+        .container {
+            max-width: 1250px;
+            margin: 30px auto;
+            padding: 0 22px;
+        }
+
+        .title {
+            font-size: 26px;
+            font-weight: bold;
+            margin-bottom: 7px;
+        }
+
+        .description {
+            color: #64748b;
+            margin-bottom: 25px;
+        }
+
+        /* VALUE CARDS */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 22px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: #087ea4;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+
+        .card-title {
+            color: #64748b;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .value {
+            font-size: 30px;
+            font-weight: bold;
+            color: #0f4c81;
+            margin: 10px 0 4px;
+        }
+
+        .unit {
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        /* DASHBOARD CONTENT */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-top: 22px;
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 22px;
+        }
+
+        .panel h2 {
+            font-size: 18px;
+            margin-bottom: 18px;
+        }
+
+        /* GRAPH */
+        .chart {
+            width: 100%;
+            height: 280px;
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+
+        /* ALERTS */
+        .alert {
+            background: #f0fdf4;
+            color: #166534;
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        /* DETAIL PAGE */
+        #detailPage {
+            display: none;
+        }
+
+        .back-button {
+            background: #e0f2fe;
+            color: #075985;
+            border: none;
+            padding: 11px 16px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 18px;
+        }
+
+        .back-button:hover {
+            background: #bae6fd;
+        }
+
+        .detail-value {
+            font-size: 45px;
+            font-weight: bold;
+            color: #087ea4;
+            margin: 10px 0;
+        }
+
+        .detail-unit {
+            color: #64748b;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .info-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .info-box small {
+            color: #64748b;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-top: 7px;
+            font-size: 17px;
+        }
+
+        .normal {
+            color: #047857;
+        }
+
+        /* RESPONSIVE */
+        @media(max-width: 900px) {
+
+            .cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media(max-width: 600px) {
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header class="header">
+
+    <div>
+        <div class="logo">AquaOptiX</div>
+
+        <div class="subtitle">
+            Intelligent Water Quality Monitoring & Purification
+        </div>
+    </div>
+
+    <div class="system-status">
+        ● SYSTEM NORMAL
+    </div>
+
+</header>
+
+
+<div class="container">
+
+    <!-- ================= HOME PAGE ================= -->
+
+    <section id="homePage">
+
+        <div class="title">
+            Water Quality Dashboard
+        </div>
+
+        <div class="description">
+            Select any parameter to view detailed information.
+        </div>
+
+
+        <!-- VALUE CARDS -->
+
+        <div class="cards">
+
+            <div class="card" onclick="openParameter('ph')">
+
+                <div class="card-title">
+                    pH Level
+                </div>
+
+                <div class="value">
+                    7.2
+                </div>
+
+                <div class="unit">
+                    pH
+                </div>
+
+            </div>
+
+
+            <div class="card" onclick="openParameter('turbidity')">
+
+                <div class="card-title">
+                    Turbidity
+                </div>
+
+                <div class="value">
+                    3.8
+                </div>
+
+                <div class="unit">
+                    NTU
+                </div>
+
+            </div>
+
+
+            <div class="card" onclick="openParameter('temperature')">
+
+                <div class="card-title">
+                    Temperature
+                </div>
+
+                <div class="value">
+                    28.5
+                </div>
+
+                <div class="unit">
+                    °C
+                </div>
+
+            </div>
+
+
+            <div class="card" onclick="openParameter('tds')">
+
+                <div class="card-title">
+                    TDS
+                </div>
+
+                <div class="value">
+                    420
+                </div>
+
+                <div class="unit">
+                    ppm
+                </div>
+
+            </div>
+
+
+            <div class="card" onclick="openParameter('flow')">
+
+                <div class="card-title">
+                    Flow Rate
+                </div>
+
+                <div class="value">
+                    2.4
+                </div>
+
+                <div class="unit">
+                    L/min
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- GRAPH + ALERTS -->
+
+        <div class="dashboard-grid">
+
+            <div class="panel">
+
+                <h2>
+                    24-Hour Water Quality Trend
+                </h2>
+
+                <canvas id="mainChart" class="chart"></canvas>
+
+            </div>
+
+
+            <div class="panel">
+
+                <h2>
+                    System Alerts
+                </h2>
+
+                <div class="alert">
+                    ✓ Water quality parameters are within normal range.
+                </div>
+
+                <div class="alert">
+                    ✓ No critical contamination detected.
+                </div>
+
+                <div class="alert">
+                    ✓ Purification system status: Ready
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= DETAIL PAGE ================= -->
+
+    <section id="detailPage">
+
+        <button class="back-button" onclick="goBack()">
+            ← Back to Dashboard
+        </button>
+
+
+        <div class="panel">
+
+            <h2 id="detailTitle">
+                Parameter
+            </h2>
+
+            <div class="detail-value" id="detailValue">
+                0
+            </div>
+
+            <div class="detail-unit" id="detailUnit">
+                -
+            </div>
+
+
+            <div class="detail-grid">
+
+                <div class="info-box">
+
+                    <small>
+                        Normal Range
+                    </small>
+
+                    <strong id="normalRange">
+                        -
+                    </strong>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <small>
+                        Status
+                    </small>
+
+                    <strong class="normal">
+                        NORMAL
+                    </strong>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <small>
+                        Monitoring
+                    </small>
+
+                    <strong>
+                        Active
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div style="margin-top:30px;">
+
+                <h2>
+                    Parameter Trend
+                </h2>
+
+                <canvas id="detailChart" class="chart"></canvas>
+
+            </div>
+
+
+            <p id="detailDescription"
+               style="margin-top:18px;color:#64748b;font-size:14px;">
+            </p>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<script>
+
+    /* ===============================
+       WATER QUALITY DATA
+    =============================== */
+
+    const waterData = {
+
+        ph: {
+
+            title: "pH Level",
+
+            value: "7.2",
+
+            unit: "pH",
+
+            range: "6.5 – 8.5",
+
+            description:
+                "pH indicates the acidity or alkalinity of water.",
+
+            values:
+                [7.0,7.1,7.1,7.2,7.2,7.3,7.2,7.2,7.1,7.2,7.2,7.2]
+
+        },
+
+
+        turbidity: {
+
+            title: "Turbidity",
+
+            value: "3.8",
+
+            unit: "NTU",
+
+            range: "0 – 5 NTU",
+
+            description:
+                "Turbidity represents the clarity of water.",
+
+            values:
+                [4.5,4.2,4.0,3.9,3.8,3.7,3.8,3.9,3.7,3.8,3.8,3.8]
+
+        },
+
+
+        temperature: {
+
+            title: "Temperature",
+
+            value: "28.5",
+
+            unit: "°C",
+
+            range: "20 – 35 °C",
+
+            description:
+                "Water temperature is monitored for operating conditions.",
+
+            values:
+                [27.8,28.0,28.1,28.3,28.5,28.7,28.6,28.5,28.4,28.5,28.5,28.5]
+
+        },
+
+
+        tds: {
+
+            title: "TDS",
+
+            value: "420",
+
+            unit: "ppm",
+
+            range: "0 – 500 ppm",
+
+            description:
+                "TDS indicates the total dissolved solids in water.",
+
+            values:
+                [450,445,438,430,425,420,418,422,420,421,420,420]
+
+        },
+
+
+        flow: {
+
+            title: "Flow Rate",
+
+            value: "2.4",
+
+            unit: "L/min",
+
+            range: "1 – 5 L/min",
+
+            description:
+                "Flow rate indicates the current water flow through the system.",
+
+            values:
+                [2.0,2.1,2.2,2.3,2.4,2.5,2.4,2.4,2.3,2.4,2.4,2.4]
+
+        }
+
+    };
+
+
+    /* ===============================
+       OPEN PARAMETER
+    =============================== */
+
+    function openParameter(parameter) {
+
+        const data = waterData[parameter];
+
+        document.getElementById("homePage").style.display = "none";
+
+        document.getElementById("detailPage").style.display = "block";
+
+
+        document.getElementById("detailTitle").innerText =
+            data.title;
+
+        document.getElementById("detailValue").innerText =
+            data.value;
+
+        document.getElementById("detailUnit").innerText =
+            data.unit;
+
+        document.getElementById("normalRange").innerText =
+            data.range;
+
+        document.getElementById("detailDescription").innerText =
+            data.description;
+
+
+        drawChart(
+            "detailChart",
+            data.values
+        );
+
+    }
+
+
+    /* ===============================
+       BACK BUTTON
+    =============================== */
+
+    function goBack() {
+
+        document.getElementById("detailPage").style.display =
+            "none";
+
+        document.getElementById("homePage").style.display =
+            "block";
+
+    }
+
+
+    /* ===============================
+       DRAW GRAPH
+    =============================== */
+
+    function drawChart(canvasId, values) {
+
+        const canvas =
+            document.getElementById(canvasId);
+
+        const ctx =
+            canvas.getContext("2d");
+
+
+        const width =
+            canvas.width = canvas.clientWidth * 2;
+
+        const height =
+            canvas.height = canvas.clientHeight * 2;
+
+
+        ctx.clearRect(
+            0,
+            0,
+            width,
+            height
+        );
+
+
+        const padding = 45;
+
+
+        const min =
+            Math.min(...values);
+
+        const max =
+            Math.max(...values);
+
+
+        const range =
+            (max - min) || 1;
+
+
+        /* AXES */
+
+        ctx.strokeStyle = "#cbd5e1";
+
+        ctx.lineWidth = 2;
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            padding,
+            padding
+        );
+
+        ctx.lineTo(
+            padding,
+            height - padding
+        );
+
+        ctx.lineTo(
+            width - padding,
+            height - padding
+        );
+
+        ctx.stroke();
+
+
+        /* LINE */
+
+        ctx.strokeStyle = "#087ea4";
+
+        ctx.lineWidth = 5;
+
+        ctx.beginPath();
+
+
+        values.forEach((value,index) => {
+
+            const x =
+                padding +
+                index *
+                (
+                    (width - padding * 2) /
+                    (values.length - 1)
+                );
+
+
+            const y =
+                height -
+                padding -
+                (
+                    (value - min) /
+                    range
+                ) *
+                (
+                    height -
+                    padding * 2
+                );
+
+
+            if(index === 0) {
+
+                ctx.moveTo(x,y);
+
+            } else {
+
+                ctx.lineTo(x,y);
+
+            }
+
+        });
+
+
+        ctx.stroke();
+
+
+        /* POINTS */
+
+        values.forEach((value,index) => {
+
+            const x =
+                padding +
+                index *
+                (
+                    (width - padding * 2) /
+                    (values.length - 1)
+                );
+
+
+            const y =
+                height -
+                padding -
+                (
+                    (value - min) /
+                    range
+                ) *
+                (
+                    height -
+                    padding * 2
+                );
+
+
+            ctx.fillStyle = "#087ea4";
+
+            ctx.beginPath();
+
+            ctx.arc(
+                x,
+                y,
+                6,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+        });
+
+    }
+
+
+    /* ===============================
+       MAIN GRAPH
+    =============================== */
+
+    drawChart(
+        "mainChart",
+        waterData.ph.values
+    );
+
+
+    /* ===============================
+       RESPONSIVE GRAPH
+    =============================== */
+
+    window.addEventListener(
+        "resize",
+        function() {
+
+            drawChart(
+                "mainChart",
+                waterData.ph.values
+            );
+
+        }
+    );
+
+</script>
+
+</body>
+</html>
